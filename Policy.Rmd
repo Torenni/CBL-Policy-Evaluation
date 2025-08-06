@@ -1,0 +1,203 @@
+---
+title: "Untitled"
+author: "Haven Yarl"
+date: "2025-07-10"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(scales)          # variable transforms, formatting tables
+library(stargazer)       # formatting regression output
+library(tidyverse)       # data wrangling
+library(pander)          # nice tables
+library(Wats)            # time series plots
+library(readxl)
+```
+
+# Overview of the strategg analysis
+
+The primary objective of this strategy analysis is to evaluate the impact of Liberia’s transition to an interest rate-based monetary policy framework, introduced in late 2019, on two critical economic indicators: the exchange rate (LRD/USD) and inflation.  Through this evaluation, stakeholders, including the CBL, the Ministry of Finance and Development Planning (MFDP), financial institutions, civil society organizations, and ECOWAS bodies, can expect to gain critical insights. These include an assessment of the relationship between interest rate adjustments and exchange rate movements, the degree to which exchange rate fluctuations are driving inflation, and the framework’s overall ability to maintain price stability in a fragile and dollarized economy. The findings will be used to improve policy design, strengthen macroeconomic forecasting, and guide future reforms toward inflation targeting. In addition, the evaluation will help inform decisions on foreign reserve management, public financial planning, and market interventions that directly affect the cost of living and business operations in Liberia.
+
+# Data
+
+```{r}
+# Load exchange rate data
+exchange= read_excel("/Users/havenyarl/Documents/Projects/Policy_Evaluation/Dataset/Exchange_data.xlsx")
+# Load the inflation data
+inflation= read_excel("/Users/havenyarl/Documents/Projects/Policy_Evaluation/Dataset/Inflation_data.xlsx")
+# Load the interest rate and exchange rate data
+interest.exchange= read_excel("/Users/havenyarl/Documents/Projects/Policy_Evaluation/Dataset/Interest_Exchange_data.xlsx")
+# Load the interest rate and inflation data
+interest.inflation= read_excel("/Users/havenyarl/Documents/Projects/Policy_Evaluation/Dataset/Interest_Inflation_data.xlsx")
+```
+
+## Exchange rate and inflation trends
+```{r}
+plot(exchange$Time, exchange$Exchange_Rate,
+     col= "steelblue", bty= "n", 
+     xlab= "",
+     ylab= "",
+     pch= 19, type= "l", lwd= 2.5,
+     las= 1, xaxt= "n",
+     cex.main= 0.9,
+     col.main= "darkred")
+
+
+# Add custom x-axis with year labels every 12 months
+axis(1, at = seq(1, 127, by = 12),                # positions for each year
+     labels = 2015:2025)                          # year labels
+
+# Add custom y-axis label
+mtext("Exchange Rate", side = 2, line = 3, col = "darkred", cex = 0.9, font = 2)
+
+# Add left-aligned title using mtext()
+mtext("Liberia's Currency Exchange Trend", side = 3, line = 1, adj = 0, col = "darkred", cex = 0.9, font= 2)
+```
+
+```{r}
+# Assume `exchange` is your data frame and Time goes from 1 to 127 (monthly)
+# Add a 'Year' variable for labeling every 12 months
+exchange$Year <- rep(2015:2025, each = 12)[1:nrow(exchange)]
+
+ggplot(exchange, aes(x = Time, y = Exchange_Rate)) +
+  geom_line(color = "steelblue", linewidth = 1.2) +
+  scale_x_continuous(
+    breaks = seq(1, 127, by = 12),
+    labels = 2015:2025
+  ) +
+  labs(
+    title = "Liberia's Currency Exchange Trends",
+    y = "Exchange Rate",
+    x = NULL
+  ) +
+  theme_minimal(base_size = 10) +
+  theme(
+    plot.title = element_text(size = 12, color = "darkred", hjust = -0.0),
+    axis.title.y = element_text(size = 10, color = "darkred"),
+    axis.text.y = element_text(angle = 0),  # horizontal y-axis labels
+    axis.text.x = element_text(angle = 0)   # horizontal x-axis labels
+  )
+
+```
+**Exchange Rate and Inflation Trends**
+
+Between 2015 and late 2019, Liberia experienced a sustained depreciation of its currency. As shown in the first graph, the Liberian dollar (LRD) steadily lost value against the U.S. dollar, with the exchange rate climbing from approximately LRD 85/USD in 2015 to over LRD 190/USD by the end of 2019. This depreciation accelerated particularly between 2017 and mid-2019, signaling persistent macroeconomic imbalances and increasing pressure on foreign reserves. The situation reflects underlying structural weaknesses in Liberia’s economy, including a narrow export base, heavy reliance on imports, and limited monetary control under the previous exchange rate-targeting framework. The steep climb in exchange rates during this period added stress to the cost of living and undermined public confidence in the local currency.
+
+```{r}
+plot(inflation$Time, inflation$Inflation_Rate,
+     col= "steelblue", bty= "n", 
+     xlab= "",
+     ylab= "",
+     pch= 19, type= "l", lwd= 2.5,
+     las= 1, xaxt= "n",
+     cex.main= 0.9,
+     col.main= "darkred")
+
+
+# Add custom x-axis with year labels every 12 months
+axis(1, at = seq(1, 121, by = 12),                # positions for each year
+     labels = 2015:2025)                          # year labels
+
+# Add custom y-axis label
+mtext("Inflation Rate", side = 2, line = 3, col = "darkred", cex = 0.9, font= 2)
+
+# Add left-aligned title using mtext()
+mtext("Liberia's Inflation Trend", side = 3, line = 1, adj = 0, col = "darkred", cex = 0.9, font= 2)
+```
+
+```{r}
+ggplot(inflation, aes(x = Time, y = Inflation_Rate)) +
+  geom_area(fill = "#c6dbef", color = "steelblue", linewidth = 0.5) +
+  scale_x_continuous(
+    breaks = seq(1, 121, by = 12),
+    labels = 2015:2025
+  ) +
+  labs(
+    title = "Liberia's Inflation trend",
+    y = "Inflation Rate",
+    x = NULL
+  ) +
+  theme_minimal(base_size = 10) +
+  theme(
+    plot.title = element_text(size = 12, color = "darkred", hjust = -0.0),
+    axis.title.y = element_text(size = 10, color = "darkred"),
+    axis.text.y = element_text(angle = 0),  # horizontal y-axis labels
+    axis.text.x = element_text(angle = 0)   # horizontal x-axis labels
+  )
+```
+The inflation trend mirrors these challenges. As the second graph indicates, inflation, which hovered around 8–10% in 2015 and 2016, began rising sharply from 2017 onward, peaking above 30% in mid-2019. This surge was largely driven by currency depreciation, higher import prices, and structural vulnerabilities in the domestic supply chain. The sharp rise in prices eroded real incomes and disproportionately affected vulnerable populations, leading to growing public concern. These trends formed the backdrop against which the CBL transitioned to an interest rate-based monetary policy framework in late 2019—an effort aimed at strengthening macroeconomic control, stabilizing the exchange rate, and reducing inflationary pressure through improved liquidity management and signaling.
+
+# Modeling 
+```{r}
+# Exchange rate ITS model
+exITS= lm(Exchange_Rate ~ Time + Policy + Time.x.policy, data= exchange)
+
+stargazer(exITS, type = "text", digits = 2,
+          covariate.labels = c("Constant","Time",
+                               "Policy",
+                               "Time Since Policy"),
+          intercept.bottom = F)
+```
+
+ 
+```{r}
+plot(exchange$Time, exchange$Exchange_Rate,
+     col= "steelblue", bty= "n", 
+     xlab= "",
+     ylab= "",
+     pch= 19, type= "l", lwd= 2.5,
+     las= 1, xaxt= "n",
+     cex.main= 0.9,
+     col.main= "darkred")
+
+# Add custom x-axis with year labels every 12 months
+axis(1, at = seq(1, 127, by = 12),                # positions for each year
+     labels = 2015:2025)                          # year labels
+
+# Add custom y-axis label
+mtext("Exchange Rate", side = 2, line = 3, col = "darkred", cex = 0.9, font = 2)
+
+# Add left-aligned title using mtext()
+mtext("Liberia's Currency Exchange Trend", side = 3, line = 1, adj = 0, col = "darkred", cex = 0.9, font= 2)
+
+# Add line marking the intervention
+abline(v= 59, col= "darkred", lty= 3, lwd= 2)
+text(59,210, "Start of Policy", col= "darkred", cex=1, pos= 4)
+lines(exchange$Time, exITS$fitted.values, col= "darkred", lwd= 2, lty=3)
+```
+
+```{r}
+# Assume `exchange` is your data frame and Time goes from 1 to 127 (monthly)
+
+exchange= mutate(exchange, fitted= predict(exITS))
+
+ggplot(exchange, aes(x = Time, y = Exchange_Rate)) +
+  geom_line(color = "steelblue", linewidth = 1) +
+  geom_line(aes(y= fitted), color= "darkred", linetype = "dashed") +
+  
+  geom_vline(xintercept = 59, linetype= "dashed", color= "darkred") +
+  
+  annotate("text", x= 59, y= 210, label= "Start of Policy",
+           hjust= -0.1, vjust= 1, size= 4, color= "darkred") +
+  
+  scale_x_continuous(
+    breaks = seq(1, 127, by = 12),
+    labels = 2015:2025
+  ) +
+  labs(
+    title = "Liberia's Currency Exchange Trends",
+    y = "Exchange Rate",
+    x = NULL
+  ) +
+  theme_minimal(base_size = 10) +
+  theme(
+    plot.title = element_text(size = 12, color = "darkred", hjust = -0.0),
+    axis.title.y = element_text(size = 10, color = "darkred"),
+    axis.text.y = element_text(angle = 0),  # horizontal y-axis labels
+    axis.text.x = element_text(angle = 0)   # horizontal x-axis labels
+  )
+
+```
+ 
+ 
+ 
